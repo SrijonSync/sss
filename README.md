@@ -1,28 +1,26 @@
----sql
--- Table Creation
-CREATE TABLE medical (
-    PatientId VARCHAR(30),
-    AppointmentID INT,
-    Gender CHAR(1),
-    ScheduledDay TIMESTAMP,
-    AppointmentDay TIMESTAMP,
-    Age INT,
-    Neighbourhood VARCHAR(100),
-    Scholarship BOOLEAN,
-    Hipertension BOOLEAN,
-    Diabetes BOOLEAN,
-    Alcoholism BOOLEAN,
-    Handcap BOOLEAN,
-    SMS_received BOOLEAN,
-    No_show BOOLEAN
+-- Table CreationCREATE TABLE medical (
+PatientId VARCHAR(30),
+AppointmentID INT,
+Gender CHAR(1),
+ScheduledDay TIMESTAMP,
+AppointmentDay TIMESTAMP,
+Age INT,
+Neighbourhood VARCHAR(100),
+Scholarship BOOLEAN,
+Hipertension BOOLEAN,
+Diabetes BOOLEAN,
+Alcoholism BOOLEAN,
+Handcap BOOLEAN,
+SMS_received BOOLEAN,
+No_show BOOLEAN
 );
 
 -- Find missing values in important columns
 SELECT * FROM medical
 WHERE PatientId IS NULL
-   OR AppointmentID IS NULL
-   OR ScheduledDay IS NULL
-   OR AppointmentDay IS NULL;
+OR AppointmentID IS NULL
+OR ScheduledDay IS NULL
+OR AppointmentDay IS NULL;
 
 -- Detect duplicates
 SELECT PatientId, AppointmentDay, COUNT(*)
@@ -76,7 +74,7 @@ SELECT * FROM medical WHERE PatientId IS NULL OR Age IS NULL;
 -- Detect outliers in Age (patients with extreme values)
 SELECT * FROM medical 
 WHERE Age > (SELECT AVG(Age) + 3 * STDDEV(Age) FROM medical)
-   OR Age < (SELECT AVG(Age) - 3 * STDDEV(Age) FROM medical);
+OR Age < (SELECT AVG(Age) - 3 * STDDEV(Age) FROM medical);
 
 -- Find patients with the highest number of missed appointments
 SELECT PatientId, COUNT(*) AS missed 
@@ -104,8 +102,8 @@ ORDER BY Month;
 
 -- List the top 5 neighborhoods with the highest no-show rate
 SELECT Neighbourhood, COUNT(*) AS total,
-       SUM(CASE WHEN No_show = 'Yes' THEN 1 ELSE 0 END) AS noshow,
-       ROUND((SUM(CASE WHEN No_show = 'Yes' THEN 1 ELSE 0 END) * 100.0) / COUNT(*), 2) AS noshowrate
+SUM(CASE WHEN No_show = 'Yes' THEN 1 ELSE 0 END) AS noshow,
+ROUND((SUM(CASE WHEN No_show = 'Yes' THEN 1 ELSE 0 END)  100.0) / COUNT(), 2) AS noshowrate
 FROM medical
 GROUP BY Neighbourhood
 ORDER BY noshowrate DESC
@@ -113,7 +111,7 @@ LIMIT 10;
 
 -- Find the percentage of patients who received an SMS but still didn’t show up
 SELECT COUNT(*) AS TotalSMSNotAttended, 
-       ROUND((COUNT(*) * 100.0) / (SELECT COUNT(*) FROM medical WHERE SMS_received = 1), 2) AS Percentage 
+ROUND((COUNT()  100.0) / (SELECT COUNT(*) FROM medical WHERE SMS_received = 1), 2) AS Percentage 
 FROM medical 
 WHERE SMS_received = 1 AND No_show = 'Yes';
 
@@ -126,15 +124,15 @@ CREATE INDEX idx_appointment_date ON medical (AppointmentDay);
 SELECT * 
 FROM medical
 WHERE PatientId = '12345678' 
-   AND AppointmentDay >= '2024-01-01' 
-   AND AppointmentDay <= '2024-02-01';
+AND AppointmentDay >= '2024-01-01' 
+AND AppointmentDay <= '2024-02-01';
 
 -- Identify patients who had multiple appointments on the same day using a subquery
 SELECT * 
 FROM medical a
 WHERE EXISTS (SELECT 1 
-              FROM medical b 
-              WHERE a.PatientId = b.PatientId 
-                AND a.AppointmentDay = b.AppointmentDay 
-              GROUP BY b.PatientId, b.AppointmentDay 
-              HAVING COUNT(*) > 1);
+FROM medical b 
+WHERE a.PatientId = b.PatientId 
+AND a.AppointmentDay = b.AppointmentDay 
+GROUP BY b.PatientId, b.AppointmentDay 
+HAVING COUNT(*) > 1);
